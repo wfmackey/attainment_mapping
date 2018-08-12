@@ -1,0 +1,33 @@
+\chapter{Our first wonderful chapter}\label{chap:Chap1}
+
+    Intro text is within \Vref{chap:Chap1}. \textbf{The } 
+    
+\section{Section heading}\label{sec:newssec}
+
+    Section intro text \Vref{sec:newssec}.
+
+\subsection{Subsection heading}\label{sec:above}
+(Norton 2012) \footcite{Norton2012}
+    \textcite{Norton2012}
+    
+    \footnote{\textcite{Norton2017b}}
+    \footcite[test][2-10]{Norton2017c}
+
+
+    Subsection text with a reference.\footcite[][2-10]{Gore2017a} Or we can have text with a footnote.\footnote{This is a plain old footnote.}
+    
+    We can have a plain old footnote that contains a citation by using \texttt{textcite} within a \texttt{footnote}.\footnote{Just like this one; \textcite{Norton2018d}.}
+
+
+\subsection{Another Subsection heading}\label{sec:another}
+
+    In \Vref{sec:above} we did some referencing. We can also cross-reference using \texttt{Vref} or \texttt{Cref}. 
+    
+    We can also reference multiple pieces using \texttt{footcites}. \footcites[][]{Gore2017a}[][]{Gore2017b}[][51]{RoyMorganResearch2009} 
+
+
+\subsubsection{Subsubsection heading}
+
+    \Cref{sec:another} was pretty exciting.
+
+

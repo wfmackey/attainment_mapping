@@ -1,0 +1,35 @@
+\documentclass[submission]{grattan}
+\usepackage{longtable}
+\usepackage{lipsum}
+\addbibresource{bib/put-new-refs-here.bib}
+
+\author{}
+\title{Full-page maps of Australia}
+\subtitle{}
+
+\GrattanReportNumber{2018-00}
+
+
+\usepackage{Sweave}
+\begin{document}
+\input{mapping-concordance}
+
+
+\chapter{Full-page maps of Australia}
+
+\lipsum{1-5}
+
+
+    \begin{figure*}
+    \caption{Bachelor-degree attainment is strongest in large cities}
+    \units{People with a bachelor degree or higher, per cent}
+    % \vspace{-2mm}
+        \includegraphics[width=2.15\columnwidth]{atlas/mapping_higher_education2.pdf}
+        \label{fig:chart1} 
+        \notewithsource{Proportion of Australian citizens aged 15 years and older who have a bachelor degree or higher as their highest level of education.}
+        {2016 Census from ABS (2018)}
+    \end{figure*}
+
+
+
+\end{document}

@@ -1,0 +1,39 @@
+
+
+\chapter{Graphics}
+
+\section{Graphics section header}
+
+\begin{enumerate}
+\item this 
+\item that
+\end{enumerate}
+
+Graphics are external visuals we present in our reports.\footnote{This is a loose definition. When we mention graphics, think of items you have generated outside of \LaTeX\ and are imported in.}
+
+We usually `host' graphics in simple \texttt{\textbackslash begin\{figure\}} environments, like \Vref{fig:firsteg}, with a caption and footer. But sometimes we want to get a bit creative. 
+
+This chapter demonstrates some non-standard graphics and non-standard placements.
+
+
+    \begin{figure}
+    \caption{International students have grown significantly}
+    \units{International students by home country, thousands}
+    \vspace{-7.5mm} %%This brings the figure up to overlap the label
+    \includegraphics[width=\columnwidth]{atlas/mapping_recreation_15.png}
+        \label{fig:firsteg} 
+        \notewithsource{This is a short note.}{This is a standard source.}
+    \end{figure}
+    
+    
+    
+    
+    \begin{figure*}
+    \caption{This is a huge figure}
+    \units{Proportion of students applying to university in year 12}
+        \includegraphics[page=2, width=2.15\columnwidth]{atlas/transition_fullpage.pdf}
+        \label{fig:fullpage} 
+        \notewithsource{This is a short note.}{This is a standard source.}
+    \end{figure*}
+    
+    
