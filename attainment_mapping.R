@@ -16,8 +16,12 @@ gdarker <- "#BD3603"
 gred <- "#A02226"
 gdarkred <- "#621214"
 
+mapcompression = 0.2
+
 # Read ABS shapefiles for SA2
-    shapefile <- readOGR("data/sa2_2016_aust_shape/", "SA2_2016_AUST")
+    shapefile <- readOGR("data/sa2_2016_aust_shape/", "SA2_2016_AUST") %>% 
+                 ms_simplify(keep = mapcompression, keep_shapes = T)
+    
     shapefile.details <- merge(fortify(shapefile), 
                                as.data.frame(shapefile), 
                                by.x="id", 
@@ -111,7 +115,7 @@ assign(paste0(make.names(name),".map"),
     theme_void() +
     theme(aspect.ratio = 1, 
           legend.position = "off",
-          plot.title = element_text(hjust = 0.5)) +
+          plot.title = element_text %>% (hjust = 0.5)) +
     ggtitle(name) + # for the main title
     NULL 
 )
