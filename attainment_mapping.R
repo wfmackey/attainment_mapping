@@ -6,6 +6,11 @@ library(maptools)
 library(rgdal)     # R wrapper around GDAL/OGR
 library(tictoc) #
 library(scales)
+library(rmapshaper)
+library(ggthemes)
+library(mapproj)
+library(gganimate)
+
 
 # Define grattan colors
 glightyellow <- "#FFE07F"
@@ -49,21 +54,28 @@ mapcompression = 0.2
 
 # Read in higher education attainment data
 attainment <- read_csv("data/attainment_by_sa2.csv",
-                       skip = 10)
-  # Make better names
-  names(attainment)<- make.names(names(attainment),unique = TRUE)
-  
+                       skip = 11) %>% 
+  rename( sa2_name = "SA2 (UR)",
+          postgrad = "Postgraduate Degree Level",
+          graddip = "Graduate Diploma and Graduate Certificate Level",
+          bach = "Bachelor Degree Level",
+          dip = "Advanced Diploma and Diploma Level",
+          certIII_IV = "Certificate III & IV Level",
+          y10plus = "Secondary Education - Years 10 and above",
+          certI_II = "Certificate I & II Level",
+          y9below = "Secondary Education - Years 9 and below",
+          not_stated = "Not stated",
+          total = "Total") %>% 
   # Generate percentage variable
-  attainment <- attainment %>% 
-              rename(sa2_name = HEAP...1.Digit.Level) %>% 
-              mutate(pop = Total - Not.stated,
-                     bach.count = Postgraduate.Degree.Level + 
-                                  Graduate.Diploma.and.Graduate.Certificate.Level +
-                                  Bachelor.Degree.Level,
-                     bach = 100 * bach.count / pop) %>% 
-              select(sa2_name, pop, bach.count, bach) %>% 
-              slice(2:n()) %>% 
-              mutate_if(is.factor, as.character)
+  mutate(pop = total - not_stated,
+         bach_count = postgrad + 
+                      graddip +
+                      bach,
+         bach = 100 * bach_count / pop) %>% 
+  select(sa2_name, pop, bach_count, bach) %>% 
+  slice(2:n()) %>% 
+  mutate_if(is.factor, as.character) %>% 
+  filter(!is.na(bach))
 
  # Merge to shapefile in sa2
 sa2data <- left_join(sa2, attainment, by = "sa2_name")
@@ -78,7 +90,11 @@ sa2nona <- filter(sa2data, !is.na(bach))
 australia.map <-
        sa2data %>%
          ggplot() + 
-         geom_polygon(aes(x = long, y = lat, group = group, fill = bach), color = NA) + 
+         geom_polygon(aes(x = long, 
+                          y = lat, 
+                          group = group, 
+                          fill = bach), 
+                      color = NA) + 
          scale_fill_gradientn(name = "",
                               colours = c(glightyellow, gdark, gdarkred),
                               values = rescale(c(0, 20, 50, 70)),
@@ -89,44 +105,75 @@ australia.map <-
                plot.title = element_text(hjust = 0.5)) +
          NULL 
 
-ggsave("australia_map.pdf", australia.map ,device = "pdf")
+  ggsave("australia_map.pdf", australia.map, device = "pdf")
 
 
+sa2data  <- sa2data %>% mutate(year = "2016")
+sa2data2 <- sa2data %>% mutate(year = "2011",
+                               bach = 2*rnorm(1)*bach)
+            
+sa2data <- bind_rows(sa2data,
+                     sa2data2)
+  
 
 # Create map for each capital city
 states <- as.character(unique(sa2data$state))
 
-for (i in states) {
+makeCityMap <- function(i, plot = FALSE, animate = FALSE) {
   
-namedata <- sa2data %>% filter(city == TRUE, state == i) %>% select(gcc_name)
-name <- as.character(namedata[1,1])
+  
+  
+  namedata <- sa2data %>% filter(city == TRUE, state == i) %>% select(gcc_name)
+  name <- as.character(namedata[1,1])
 
-assign(paste0(make.names(name),".map"),
-       sa2data %>% filter(city == TRUE,
-                     state == i,
-                     pop > 10) %>%
-    ggplot() + 
-    geom_polygon(aes(x = long, y = lat, group = group, fill = bach), color = NA) + 
-    scale_fill_gradientn(name = "",
-                         colours = c(glightyellow, gdark, gdarkred),
-                         values = rescale(c(0, 20, 50, 70)),
-                         limits = c(0,70),
-                         na.value = "grey90") +
-    theme_void() +
-    theme(aspect.ratio = 1, 
-          legend.position = "off",
-          plot.title = element_text %>% (hjust = 0.5)) +
-    ggtitle(name) + # for the main title
-    NULL 
-)
-get(paste0(make.names(name),".map"))
-ggsave(paste0(name,"_map.pdf"), device = "pdf")
-toc()
+  p <- 
+  sa2data %>% 
+    filter(city == TRUE,
+           state == i,
+           pop > 10) %>%
+      ggplot() + 
+      geom_polygon(aes(x = long, y = lat, group = group, fill = bach), color = NA) + 
+      scale_fill_gradientn(name = "",
+                           colours = c(glightyellow, gdark, gdarkred),
+                           values = rescale(c(0, 20, 50, 70)),
+                           limits = c(0,70),
+                           na.value = "grey90") +
+      coord_map() +
+      theme_void() +
+      theme(aspect.ratio = 1, 
+            legend.position = "off",
+            plot.title = element_text(hjust = 0.5)) +
+      labs(title = paste0(name, "")) +
+      NULL 
+
+  if (!animate) {
+      ggsave(paste0(name,"_map.pdf"), 
+             p,
+             height = 10, width = 10)
+  }
+  
+  if (animate) {
+    p <- p + transition_states(
+             year,
+             transition_length = 2,
+             state_length = 4)
+    p
+    anim_save("melb.gif", p)
+  } 
+  
+  if (plot && !animate) p
+  
+  print("Done")
+  
 }
 
 
+makeCityMap("Victoria", animate = TRUE)
 
 
+purrr::map(states, makeCityMap)
+
+i = "Victoria"
 
 
 
